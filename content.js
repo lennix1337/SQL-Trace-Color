@@ -228,8 +228,14 @@ function processTracePage() {
         if (sqlMatchResult) {
             const uniqueId = `sql-block-${sqlBlockCounter++}`;
             let executionTime = 0;
-            if (cells.length >= 4) {
-                executionTime = findExecutionTime(cells[3].textContent);
+            // Check the next row for execution time
+            const nextRow = element.nextElementSibling;
+            if (nextRow && nextRow.tagName === 'TR') {
+                const nextRowCells = nextRow.querySelectorAll('td');
+                if (nextRowCells.length > 0) {
+                    // Assuming the time is in the last td of the next row
+                    executionTime = findExecutionTime(nextRowCells[nextRowCells.length - 1].textContent);
+                }
             }
 
             const { statement: rawSql, matchEndIndexInBlock } = sqlMatchResult;
