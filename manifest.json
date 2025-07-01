@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "SQL Trace Enhancer",
+  "description": "Extracts SQL and parameters from trace.axd, generates runnable queries, and provides a copy-to-clipboard feature.",
+  "version": "2.0",
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*/Trace.axd?id=*",
+        "https://*/*/Trace.axd?id=*"
+      ],
+      "js": ["content.js"]
+    }
+  ]
+,
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
