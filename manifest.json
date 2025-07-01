@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "SQL Trace Enhancer",
   "description": "Extracts SQL and parameters from trace.axd, generates runnable queries, and provides a copy-to-clipboard feature.",
+  "default_locale": "en",
   "version": "2.0",
   "permissions": [
     "activeTab",

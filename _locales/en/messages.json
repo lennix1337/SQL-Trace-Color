@@ -1,0 +1,70 @@
+{
+  "panelTitle": {
+    "message": "SQL Summary & Analytics",
+    "description": "Title of the analytics panel"
+  },
+  "overallSection": {
+    "message": "Overall",
+    "description": "Header for overall statistics section"
+  },
+  "totalQueries": {
+    "message": "Total Queries:",
+    "description": "Label for total number of queries"
+  },
+  "totalExecutionTime": {
+    "message": "Total Execution Time:",
+    "description": "Label for total execution time"
+  },
+  "queryTypesSection": {
+    "message": "Query Types",
+    "description": "Header for query types section"
+  },
+  "slowestQueriesSection": {
+    "message": "Top 5 Slowest Queries (Click to view)",
+    "description": "Header for slowest queries section"
+  },
+  "sqlReadyToCopy": {
+    "message": "SQL with Parameters (Ready to Copy):",
+    "description": "Title for the runnable SQL block"
+  },
+  "copySqlButton": {
+    "message": "Copy SQL",
+    "description": "Text for the copy SQL button"
+  },
+  "copiedButton": {
+    "message": "Copied!",
+    "description": "Text for the copy SQL button after copying"
+  },
+  "copyFailed": {
+    "message": "SQL Trace Enhancer: Failed to copy SQL:",
+    "description": "Error message for failed SQL copy"
+  },
+  "noTraceTableFound": {
+    "message": "SQL Trace Enhancer: No trace table rows found.",
+    "description": "Warning message when no trace table is found"
+  },
+  "optionsTitle": {
+    "message": "SQL Trace Enhancer Options",
+    "description": "Title of the extension options page"
+  },
+  "openPanelByDefault": {
+    "message": "Open Analytics Panel by Default",
+    "description": "Label for the checkbox to open panel by default"
+  },
+  "preferenceSaved": {
+    "message": "Preference saved!",
+    "description": "Message indicating preference has been saved"
+  },
+  "languageSetting": {
+    "message": "Language:",
+    "description": "Label for language selection dropdown"
+  },
+  "languageEnglish": {
+    "message": "English",
+    "description": "English language option"
+  },
+  "languagePortuguese": {
+    "message": "Portuguese (Brazil)",
+    "description": "Portuguese (Brazil) language option"
+  }
+}

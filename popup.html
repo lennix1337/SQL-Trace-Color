@@ -12,12 +12,19 @@
     </style>
 </head>
 <body>
-    <h2>SQL Trace Enhancer Options</h2>
+    <h2>__MSG_optionsTitle__</h2>
     <div class="option-group">
         <label>
             <input type="checkbox" id="openPanelByDefault">
-            Open Analytics Panel by Default
+            __MSG_openPanelByDefault__
         </label>
+    </div>
+    <div class="option-group">
+        <label for="languageSelect">__MSG_languageSetting__</label>
+        <select id="languageSelect">
+            <option value="en">__MSG_languageEnglish__</option>
+            <option value="pt_BR">__MSG_languagePortuguese__</option>
+        </select>
     </div>
     <div id="status" class="status-message"></div>
     <script src="popup.js"></script>

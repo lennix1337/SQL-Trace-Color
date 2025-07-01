@@ -43,7 +43,7 @@ function createAnalyticsPanel(queryStats) {
     `;
 
     const title = document.createElement('h3');
-    title.textContent = 'SQL Summary & Analytics';
+    title.textContent = chrome.i18n.getMessage("panelTitle");
     title.style.cssText = 'margin: 0; font-size: 16px; color: #212529; font-weight: 600;';
 
     const toggleBtn = document.createElement('button');
@@ -80,12 +80,12 @@ function createAnalyticsPanel(queryStats) {
     // --- Populate Content ---
     let contentHTML = `
         <div style="margin-bottom: 15px;">
-            <h4 style="margin: 0 0 8px; font-size: 14px; color: #495057;">Overall</h4>
-            <p style="margin: 4px 0; font-size: 13px;"><strong>Total Queries:</strong> ${totalQueries}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><strong>Total Execution Time:</strong> ${totalTime.toLocaleString()} ms</p>
+            <h4 style="margin: 0 0 8px; font-size: 14px; color: #495057;">${chrome.i18n.getMessage("overallSection")}</h4>
+            <p style="margin: 4px 0; font-size: 13px;"><strong>${chrome.i18n.getMessage("totalQueries")}</strong> ${totalQueries}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><strong>${chrome.i18n.getMessage("totalExecutionTime")}</strong> ${totalTime.toLocaleString()} ms</p>
         </div>
         <div style="margin-bottom: 15px;">
-            <h4 style="margin: 0 0 8px; font-size: 14px; color: #495057;">Query Types</h4>
+            <h4 style="margin: 0 0 8px; font-size: 14px; color: #495057;">${chrome.i18n.getMessage("queryTypesSection")}</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 13px;">
     `;
     for (const type in queryTypes) {
@@ -97,7 +97,7 @@ function createAnalyticsPanel(queryStats) {
             </div>
         </div>
         <div>
-            <h4 style="margin: 0 0 10px; font-size: 14px; color: #495057;">Top 5 Slowest Queries (Click to view)</h4>
+            <h4 style="margin: 0 0 10px; font-size: 14px; color: #495057;">${chrome.i18n.getMessage("slowestQueriesSection")}</h4>
             <ul id="slowest-queries-list" style="list-style: none; margin: 0; padding: 0; font-size: 12px;">
     `;
 
@@ -202,7 +202,7 @@ function processTracePage() {
         traceElements = Array.from(document.querySelectorAll('table tr'));
     }
     if (traceElements.length === 0) {
-        console.warn("SQL Trace Enhancer: No trace table rows found.");
+        console.warn(chrome.i18n.getMessage("noTraceTableFound"));
         return;
     }
 
@@ -451,7 +451,7 @@ function createAndInsertSqlDisplay(runnableSql, insertionReferenceNode, isTableR
     }
 
     const title = document.createElement('h4');
-    title.textContent = 'SQL com Parâmetros (Pronto para Copiar):';
+    title.textContent = chrome.i18n.getMessage("sqlReadyToCopy");
     title.style.cssText = `margin-top: 0; margin-bottom: 8px; font-size: 14px; color: #0056b3; font-weight: bold;`;
     contentContainer.appendChild(title);
 
@@ -470,18 +470,13 @@ function createAndInsertSqlDisplay(runnableSql, insertionReferenceNode, isTableR
 
     const copyButton = document.createElement('button');
     copyButton.className = 'copy-sql-button';
-    copyButton.textContent = 'Copiar SQL';
-    copyButton.style.cssText = `
-        margin-top: 8px; padding: 6px 12px; background-color: #28a745; 
-        color: white; border: none; border-radius: 4px; cursor: pointer;
-        font-size: 12px; transition: background-color 0.2s ease;
-    `;
+    copyButton.textContent = chrome.i18n.getMessage("copySqlButton");
     copyButton.addEventListener('click', () => {
         navigator.clipboard.writeText(runnableSql).then(() => {
-            copyButton.textContent = 'Copiado!';
+            copyButton.textContent = chrome.i18n.getMessage("copiedButton");
             copyButton.style.backgroundColor = '#007bff';
             setTimeout(() => {
-                copyButton.textContent = 'Copiar SQL';
+                copyButton.textContent = chrome.i18n.getMessage("copySqlButton");
                 copyButton.style.backgroundColor = '#28a745';
             }, 2000);
         }).catch(err => {

@@ -1,0 +1,70 @@
+{
+  "panelTitle": {
+    "message": "Resumo e Análise de SQL",
+    "description": "Título do painel de análise"
+  },
+  "overallSection": {
+    "message": "Geral",
+    "description": "Cabeçalho para a seção de estatísticas gerais"
+  },
+  "totalQueries": {
+    "message": "Total de Consultas:",
+    "description": "Rótulo para o número total de consultas"
+  },
+  "totalExecutionTime": {
+    "message": "Tempo Total de Execução:",
+    "description": "Rótulo para o tempo total de execução"
+  },
+  "queryTypesSection": {
+    "message": "Tipos de Consulta",
+    "description": "Cabeçalho para a seção de tipos de consulta"
+  },
+  "slowestQueriesSection": {
+    "message": "Top 5 Consultas Mais Lentas (Clique para ver)",
+    "description": "Cabeçalho para a seção de consultas mais lentas"
+  },
+  "sqlReadyToCopy": {
+    "message": "SQL com Parâmetros (Pronto para Copiar):",
+    "description": "Título para o bloco de SQL executável"
+  },
+  "copySqlButton": {
+    "message": "Copiar SQL",
+    "description": "Texto para o botão copiar SQL"
+  },
+  "copiedButton": {
+    "message": "Copiado!",
+    "description": "Texto para o botão copiar SQL após copiar"
+  },
+  "copyFailed": {
+    "message": "SQL Trace Enhancer: Falha ao copiar SQL:",
+    "description": "Mensagem de erro para falha ao copiar SQL"
+  },
+  "noTraceTableFound": {
+    "message": "SQL Trace Enhancer: Nenhuma linha de tabela de rastreamento encontrada.",
+    "description": "Mensagem de aviso quando nenhuma tabela de rastreamento é encontrada"
+  },
+  "optionsTitle": {
+    "message": "Opções do SQL Trace Enhancer",
+    "description": "Título da página de opções da extensão"
+  },
+  "openPanelByDefault": {
+    "message": "Abrir Painel de Análise por Padrão",
+    "description": "Rótulo para a caixa de seleção para abrir o painel por padrão"
+  },
+  "preferenceSaved": {
+    "message": "Preferência salva!",
+    "description": "Mensagem indicando que a preferência foi salva"
+  },
+  "languageSetting": {
+    "message": "Idioma:",
+    "description": "Rótulo para o dropdown de seleção de idioma"
+  },
+  "languageEnglish": {
+    "message": "Inglês",
+    "description": "Opção de idioma Inglês"
+  },
+  "languagePortuguese": {
+    "message": "Português (Brasil)",
+    "description": "Opção de idioma Português (Brasil)"
+  }
+}
