@@ -4,11 +4,14 @@
   "description": "Extracts SQL and parameters from trace.axd, generates runnable queries, and provides a copy-to-clipboard feature.",
   "default_locale": "pt_BR",
   "version": "2.0",
+  "background": {
+    "service_worker": "background.js"
+  },
   "permissions": [
-    "activeTab",
     "clipboardWrite",
     "storage",
-    "scripting"
+    "scripting",
+    "declarativeContent"
   ],
   "content_scripts": [
     {
@@ -18,8 +21,7 @@
       ],
       "js": ["content.js"]
     }
-  ]
-,
+  ],
   "action": {
     "default_popup": "popup.html"
   },
