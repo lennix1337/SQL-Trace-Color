@@ -2,12 +2,13 @@
   "manifest_version": 3,
   "name": "SQL Trace Enhancer",
   "description": "Extracts SQL and parameters from trace.axd, generates runnable queries, and provides a copy-to-clipboard feature.",
-  "default_locale": "en",
+  "default_locale": "pt_BR",
   "version": "2.0",
   "permissions": [
     "activeTab",
     "clipboardWrite",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "content_scripts": [
     {
@@ -21,5 +22,16 @@
 ,
   "action": {
     "default_popup": "popup.html"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "_locales/en/messages.json",
+        "_locales/pt_BR/messages.json"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
 }

@@ -1,11 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("UI Language:", chrome.i18n.getUILanguage());
+    chrome.i18n.getAcceptLanguages(function(languages) {
+        console.log("Accepted Languages:", languages);
+    });
     const openPanelCheckbox = document.getElementById('openPanelByDefault');
+    const openPanelByDefaultLabel = document.getElementById('openPanelByDefaultLabel');
     const languageSelect = document.getElementById('languageSelect');
     const statusDiv = document.getElementById('status');
 
     // Apply i18n to static text
-    document.querySelector('h2').textContent = chrome.i18n.getMessage("optionsTitle");
-    document.querySelector('label[for="openPanelByDefault"]').textContent = chrome.i18n.getMessage("openPanelByDefault");
+    openPanelByDefaultLabel.textContent = chrome.i18n.getMessage("openPanelByDefault");
     document.querySelector('label[for="languageSelect"]').textContent = chrome.i18n.getMessage("languageSetting");
     document.querySelector('option[value="en"]').textContent = chrome.i18n.getMessage("languageEnglish");
     document.querySelector('option[value="pt_BR"]').textContent = chrome.i18n.getMessage("languagePortuguese");
@@ -13,7 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load saved preferences
     chrome.storage.sync.get(['openPanelByDefault', 'language'], function(data) {
         openPanelCheckbox.checked = data.openPanelByDefault || false; // Default to false if not set
-        languageSelect.value = data.language || chrome.i18n.getUILanguage().split('-')[0]; // Default to browser language or 'en'
+        const initialLanguage = data.language || chrome.i18n.getUILanguage().split('-')[0];
+        languageSelect.value = initialLanguage;
+        document.documentElement.lang = initialLanguage; // Set initial lang attribute
     });
 
     // Save openPanelByDefault preference when checkbox changes
@@ -30,9 +36,20 @@ document.addEventListener('DOMContentLoaded', function() {
         chrome.storage.sync.set({'language': selectedLanguage}, function() {
             statusDiv.textContent = chrome.i18n.getMessage("preferenceSaved");
             setTimeout(() => { statusDiv.textContent = ''; }, 1500);
-            // Reload the page to apply new language settings in content.js
+            document.documentElement.lang = selectedLanguage; // Update lang attribute
+            // Send a message to the content script to update its language
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.reload(tabs[0].id);
+                if (tabs[0] && tabs[0].id) {
+                    chrome.tabs.sendMessage(tabs[0].id, {action: "updateLanguage", language: selectedLanguage}, function(response) {
+                        if (chrome.runtime.lastError) {
+                            console.log("Could not establish connection. Assuming content script is not injected yet.");
+                        } else {
+                            console.log(response.status);
+                        }
+                    });
+                } else {
+                    console.log("Could not find active tab to send message to.");
+                }
             });
         });
     });

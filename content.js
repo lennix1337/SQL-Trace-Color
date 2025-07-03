@@ -1,5 +1,17 @@
 // content.js
 
+var MESSAGES = {};
+var queryAnalyticsData = []; // Store query data globally
+
+/**
+ * Custom message getter after loading the appropriate language file.
+ * @param {string} key - The message key to retrieve.
+ * @returns {string} - The translated message or the key itself if not found.
+ */
+function getMessage(key) {
+    return MESSAGES[key]?.message || key;
+}
+
 /**
  * Finds the execution time of a query from a trace.axd time cell.
  * The value is expected to be in seconds (e.g., "0,006854") and is converted to milliseconds.
@@ -43,7 +55,7 @@ function createAnalyticsPanel(queryStats) {
     `;
 
     const title = document.createElement('h3');
-    title.textContent = chrome.i18n.getMessage("panelTitle");
+    title.textContent = getMessage("panelTitle");
     title.style.cssText = 'margin: 0; font-size: 16px; color: #212529; font-weight: 600;';
 
     const toggleBtn = document.createElement('button');
@@ -80,12 +92,12 @@ function createAnalyticsPanel(queryStats) {
     // --- Populate Content ---
     let contentHTML = `
         <div style="margin-bottom: 15px;">
-            <h4 style="margin: 0 0 8px; font-size: 14px; color: #495057;">${chrome.i18n.getMessage("overallSection")}</h4>
-            <p style="margin: 4px 0; font-size: 13px;"><strong>${chrome.i18n.getMessage("totalQueries")}</strong> ${totalQueries}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><strong>${chrome.i18n.getMessage("totalExecutionTime")}</strong> ${totalTime.toLocaleString()} ms</p>
+            <h4 style="margin: 0 0 8px; font-size: 14px; color: #495057;">${getMessage("overallSection")}</h4>
+            <p style="margin: 4px 0; font-size: 13px;"><strong>${getMessage("totalQueries")}</strong> ${totalQueries}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><strong>${getMessage("totalExecutionTime")}</strong> ${totalTime.toLocaleString()} ms</p>
         </div>
         <div style="margin-bottom: 15px;">
-            <h4 style="margin: 0 0 8px; font-size: 14px; color: #495057;">${chrome.i18n.getMessage("queryTypesSection")}</h4>
+            <h4 style="margin: 0 0 8px; font-size: 14px; color: #495057;">${getMessage("queryTypesSection")}</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 13px;">
     `;
     for (const type in queryTypes) {
@@ -97,7 +109,7 @@ function createAnalyticsPanel(queryStats) {
             </div>
         </div>
         <div>
-            <h4 style="margin: 0 0 10px; font-size: 14px; color: #495057;">${chrome.i18n.getMessage("slowestQueriesSection")}</h4>
+            <h4 style="margin: 0 0 10px; font-size: 14px; color: #495057;">${getMessage("slowestQueriesSection")}</h4>
             <ul id="slowest-queries-list" style="list-style: none; margin: 0; padding: 0; font-size: 12px;">
     `;
 
@@ -202,11 +214,10 @@ function processTracePage() {
         traceElements = Array.from(document.querySelectorAll('table tr'));
     }
     if (traceElements.length === 0) {
-        console.warn(chrome.i18n.getMessage("noTraceTableFound"));
+        console.warn(getMessage("noTraceTableFound"));
         return;
     }
 
-    let queryAnalytics = [];
     let persistentExecuteReaderParams = {};
     let sqlBlockCounter = 0;
 
@@ -245,7 +256,7 @@ function processTracePage() {
             const runnableSql = substituteParams(rawSql, finalParams);
 
             if (runnableSql.trim()) {
-                queryAnalytics.push({
+                queryAnalyticsData.push({
                     sql: runnableSql,
                     time: executionTime,
                     id: uniqueId
@@ -259,8 +270,8 @@ function processTracePage() {
         }
     });
 
-    if (queryAnalytics.length > 0) {
-        createAnalyticsPanel(queryAnalytics);
+    if (queryAnalyticsData.length > 0) {
+        createAnalyticsPanel(queryAnalyticsData);
     }
 }
 
@@ -407,7 +418,7 @@ function highlightSqlSyntax(sqlString) {
     const operators = ['<=', '>=', '<>', '!=', '=', '<', '>', '\\|\\|', '\\+', '-', '\\*', '/', '%'];
     operators.forEach(op => {
         let opRegexStr = op.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const operatorRegex = new RegExp(`(?<!<[^>]*?)(${opRegexStr})(?![^<]*?>)`, 'g');
+        const operatorRegex = new RegExp(`(?<!<[^>]*?)( ${opRegexStr})(?![^<]*?>)`, 'g');
         highlightedSql = highlightedSql.replace(operatorRegex, `<span class="sql-operator">$1</span>`);
     });
     highlightedSql = highlightedSql.replace(/\n/g, '<br>');
@@ -451,7 +462,7 @@ function createAndInsertSqlDisplay(runnableSql, insertionReferenceNode, isTableR
     }
 
     const title = document.createElement('h4');
-    title.textContent = chrome.i18n.getMessage("sqlReadyToCopy");
+    title.textContent = getMessage("sqlReadyToCopy");
     title.style.cssText = `margin-top: 0; margin-bottom: 8px; font-size: 14px; color: #0056b3; font-weight: bold;`;
     contentContainer.appendChild(title);
 
@@ -470,13 +481,13 @@ function createAndInsertSqlDisplay(runnableSql, insertionReferenceNode, isTableR
 
     const copyButton = document.createElement('button');
     copyButton.className = 'copy-sql-button';
-    copyButton.textContent = chrome.i18n.getMessage("copySqlButton");
+    copyButton.textContent = getMessage("copySqlButton");
     copyButton.addEventListener('click', () => {
         navigator.clipboard.writeText(runnableSql).then(() => {
-            copyButton.textContent = chrome.i18n.getMessage("copiedButton");
+            copyButton.textContent = getMessage("copiedButton");
             copyButton.style.backgroundColor = '#007bff';
             setTimeout(() => {
-                copyButton.textContent = chrome.i18n.getMessage("copySqlButton");
+                copyButton.textContent = getMessage("copySqlButton");
                 copyButton.style.backgroundColor = '#28a745';
             }, 2000);
         }).catch(err => {
@@ -509,9 +520,44 @@ function createAndInsertSqlDisplay(runnableSql, insertionReferenceNode, isTableR
     }
 }
 
-// --- Initial call ---
-if (document.readyState === "complete" || document.readyState === "interactive") {
-    setTimeout(processTracePage, 700);
-} else {
-    document.addEventListener("DOMContentLoaded", () => setTimeout(processTracePage, 700));
+// --- Initialization and Message Handling ---
+function initialize(lang) {
+    const messagesUrl = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
+
+    fetch(messagesUrl)
+        .then(response => response.json())
+        .then(messages => {
+            MESSAGES = messages;
+            if (queryAnalyticsData.length > 0) {
+                createAnalyticsPanel(queryAnalyticsData); // Re-create panel with new language
+            } else {
+                if (document.readyState === "complete" || document.readyState === "interactive") {
+                    setTimeout(processTracePage, 700);
+                } else {
+                    document.addEventListener("DOMContentLoaded", () => setTimeout(processTracePage, 700));
+                }
+            }
+        })
+        .catch(error => console.error('Error loading translation files:', error));
 }
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "updateLanguage") {
+        let lang = request.language;
+        if (lang !== 'en' && lang !== 'pt_BR') {
+            lang = 'en'; // Fallback
+        }
+        initialize(lang);
+        sendResponse({status: "Language updated"});
+    }
+    return true; // Indicates that the response is sent asynchronously
+});
+
+// --- Initial call ---
+chrome.storage.sync.get('language', function(data) {
+    let lang = data.language || chrome.i18n.getUILanguage().split('-')[0];
+    if (lang !== 'en' && lang !== 'pt_BR') {
+        lang = 'en';
+    }
+    initialize(lang);
+});
