@@ -5,9 +5,6 @@
 
 // When the extension is installed or updated...
 chrome.runtime.onInstalled.addListener(() => {
-  // Disable the action by default to ensure it's only active on specific pages.
-  chrome.action.disable();
-
   // Clear all existing rules to ensure a clean state.
   chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
     // Define the rule to enable the action on trace.axd pages.
@@ -18,10 +15,19 @@ chrome.runtime.onInstalled.addListener(() => {
         })
       ],
       // If the condition is met, show the extension's action icon.
-      actions: [new chrome.declarativeContent.ShowAction(), new chrome.declarativeContent.SetPopup({ popup: 'popup.html' })],
+      actions: [new chrome.declarativeContent.ShowAction()],
     };
 
     // Register the rule.
     chrome.declarativeContent.onPageChanged.addRules([rule]);
   });
+});
+
+// Listen for tab updates to enable/disable the action dynamically
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && tab.url && tab.url.includes('trace.axd')) {
+    chrome.action.enable(tabId);
+  } else if (changeInfo.status === 'complete' && tab.url && !tab.url.includes('trace.axd')) {
+    chrome.action.disable(tabId);
+  }
 });
