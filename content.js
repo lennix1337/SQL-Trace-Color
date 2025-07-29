@@ -383,6 +383,7 @@ function substituteParams(sql, params) {
             const baseName = paramNameKey.replace(/^[@:]/, '');
             const escapedBaseName = escapeRegExp(baseName);
             finalSql = finalSql.replace(new RegExp('[@:]' + escapedBaseName + '(?![\\w\\d$_])', 'gi'), value);
+            finalSql = finalSql.replace(/\u00A0/g, '');
         }
     }
     return finalSql;
