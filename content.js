@@ -309,6 +309,157 @@ function findExecuteReaderParameters(textBlock) {
 }
 
 /**
+ * Finds parameters from lines like "Start GxCommand.ExecuteNonQuery: Parameters Name='Value'"
+ * @param {string} textBlock The text content of the cell.
+ * @returns {Object} A map of parameter names to their SQL-formatted values.
+ */
+function findNonQueryParameters(textBlock) {
+    const allParams = {};
+    // Regex to find the line with ExecuteNonQuery parameters
+    const lineRegex = /ExecuteNonQuery:\s*Parameters\s*([^\n<]*)/i;
+    let lineMatch = lineRegex.exec(textBlock);
+
+    if (lineMatch && lineMatch[1]) {
+        const paramsString = lineMatch[1].trim();
+        // Regex to parse individual parameters (name='value' or name=number)
+        const individualParamRegex = /([\w@$:]+)\s*=\s*(?:'((?:[^']|'')*)'|(\bNULL\b)|([-.\w\d]+(?:\s+[-\w\d]+)*))/g;
+        let paramMatch;
+
+        while ((paramMatch = individualParamRegex.exec(paramsString)) !== null) {
+            const paramName = paramMatch[1];
+            let sqlFormattedValue;
+
+            if (paramMatch[2] !== undefined) { // String value
+                let strValue = paramMatch[2].replace(/''/g, "'");
+                sqlFormattedValue = `'${strValue.replace(/'/g, "''")}'`;
+            } else if (paramMatch[3] !== undefined) { // NULL value
+                sqlFormattedValue = "NULL";
+            } else if (paramMatch[4] !== undefined) { // Unquoted value (number, etc.)
+                let unquotedValue = paramMatch[4];
+                if (!isNaN(parseFloat(unquotedValue)) && isFinite(unquotedValue) && !unquotedValue.includes(' ')) {
+                    sqlFormattedValue = unquotedValue;
+                } else {
+                    sqlFormattedValue = `'${unquotedValue.replace(/'/g, "''")}'`;
+                }
+            }
+
+            if (sqlFormattedValue !== undefined) {
+                allParams[paramName] = sqlFormattedValue;
+            }
+        }
+    }
+    return allParams;
+}
+
+/**
+ * Main function to process trace entries on the page.
+ */
+function processTracePage() {
+    let traceElements = Array.from(document.querySelectorAll('#TraceTable tbody tr'));
+    if (traceElements.length === 0) {
+        traceElements = Array.from(document.querySelectorAll('table tr'));
+    }
+    if (traceElements.length === 0) {
+        console.warn(getMessage("noTraceTableFound"));
+        return;
+    }
+
+    let persistentExecuteReaderParams = {};
+    let sqlBlockCounter = 0;
+    let pendingUpdate = null; // To hold an UPDATE statement waiting for its params
+
+    traceElements.forEach((element) => {
+        if (element.tagName !== 'TR') return;
+
+        const cells = element.querySelectorAll('td');
+        if (cells.length < 2) return;
+
+        const mainCellContent = cells[1].innerHTML;
+        const mainCellText = cells[1].textContent; // Use textContent for param search
+
+        // 1. Check if we are waiting for parameters for a pending UPDATE
+        if (pendingUpdate) {
+            const nonQueryParams = findNonQueryParameters(mainCellText);
+            if (Object.keys(nonQueryParams).length > 0) {
+                // Found params for our pending update!
+                const runnableSql = substituteParams(pendingUpdate.sql, nonQueryParams);
+                
+                // The execution time is in the *current* row (the parameter row)
+                const executionTime = findExecutionTime(cells[cells.length - 1].textContent);
+
+                if (runnableSql.trim()) {
+                    queryAnalyticsData.push({
+                        sql: runnableSql,
+                        time: executionTime,
+                        id: pendingUpdate.uniqueId
+                    });
+                }
+
+                // Insert the display block after the original UPDATE row
+                createAndInsertSqlDisplay(runnableSql, pendingUpdate.element, true, pendingUpdate.uniqueId);
+            }
+            // We only look one line ahead, so reset pendingUpdate regardless.
+            pendingUpdate = null;
+        }
+
+        // 2. The original logic for finding SQL statements
+        const executeReaderParams = findExecuteReaderParameters(mainCellContent);
+        if (Object.keys(executeReaderParams).length > 0) {
+            persistentExecuteReaderParams = executeReaderParams;
+        }
+
+        const sqlMatchResult = findSqlStatement(mainCellContent);
+
+        if (sqlMatchResult) {
+            const { statement: rawSql, matchEndIndexInBlock } = sqlMatchResult;
+            const uniqueId = `sql-block-${sqlBlockCounter++}`;
+
+            // 3. Divert logic for UPDATE statements that don't have inline params
+            const paramsAfterSql = findAndParseParameters(mainCellContent.substring(matchEndIndexInBlock || 0));
+            if (rawSql.trim().toUpperCase().startsWith('UPDATE') && Object.keys(paramsAfterSql).length === 0) {
+                // It's an UPDATE and has no immediate params. Store it and wait for the next row.
+                pendingUpdate = {
+                    sql: rawSql,
+                    element: element, // The TR element where the UPDATE was found
+                    uniqueId: uniqueId
+                };
+                return; // Continue to the next row
+            }
+
+            // 4. Existing logic for SELECT, INSERT, DELETE, and UPDATEs with inline params
+            let executionTime = 0;
+            const nextRow = element.nextElementSibling;
+            if (nextRow && nextRow.tagName === 'TR') {
+                const nextRowCells = nextRow.querySelectorAll('td');
+                if (nextRowCells.length > 0) {
+                    executionTime = findExecutionTime(nextRowCells[nextRowCells.length - 1].textContent);
+                }
+            }
+
+            const finalParams = { ...persistentExecuteReaderParams, ...paramsAfterSql };
+            const runnableSql = substituteParams(rawSql, finalParams);
+
+            if (runnableSql.trim()) {
+                queryAnalyticsData.push({
+                    sql: runnableSql,
+                    time: executionTime,
+                    id: uniqueId
+                });
+            }
+
+            let nextSibling = element.nextElementSibling;
+            if (!nextSibling || !nextSibling.classList.contains('runnable-sql-row')) {
+                createAndInsertSqlDisplay(runnableSql, element, true, uniqueId);
+            }
+        }
+    });
+
+    if (queryAnalyticsData.length > 0) {
+        createAnalyticsPanel(queryAnalyticsData);
+    }
+}
+
+/**
  * Finds a SQL statement within a block of text.
  */
 function findSqlStatement(textBlock) {
